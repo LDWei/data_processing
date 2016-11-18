@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#define BUF_SIZE 134217728      // 64位整数的个数，这里刚好占用1G内存
-/*#define BUF_SIZE 536870912      // 4G内存*/
-typedef int n32;
-typedef unsigned int u32;
-typedef long long n64;
-typedef unsigned long long u64;
-typedef struct s_u128 {
-    u64 low;
-    u64 high;
-}u128;
+#include "common.h"
 
 // 把64位有符号数扩展成128位有符号数
 void extend(u128 * integer)
@@ -242,6 +231,8 @@ int main(void)
     FILE *fr;
     n64 * buf;
     u128 sum, elem, average;
+    FreqRec * heap;
+    n32 i, times, bits, index, count_heap, heap_size;
     n64 remainder, count;
     size_t count_read;
 
@@ -249,8 +240,21 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
+    // 以下代码把完全二叉树填充为满二叉树，然后在满二叉树的下一层又添加了一个叶子节点，以便添加新的节点到堆中，然后建堆。
+    // 每次要添加新的节点，都把新节点放在此叶子节点上，然后向上调整，让此二叉树依然满足堆的要求。
+    // 因为此叶子节点所在层只有它一个节点，所以此叶子节点上存放的永远是最小的一个（所建堆为大顶堆）。
+    times = 0;
+    while (!(TOP_FREQUENCY<<times & 1<<31)) {
+        ++times;
+    }
+    bits = 32 - times;
+    heap_size = 1 << bits;
+    // 堆的索引从1到heap_size，即索引0的元素不用
+    heap = malloc((heap_size+1) * sizeof(FreqRec));
+
     // 不能静态分配大数组，gcc会产生段错误，只能动态分配
     buf = malloc(BUF_SIZE * sizeof(n64));
+    count_heap = 0;
     count = 0ULL;
     sum.low = 0ULL;
     sum.high = 0ULL;
@@ -262,7 +266,30 @@ int main(void)
             fclose(fr);
             exit(EXIT_FAILURE);
         }
-        for (int i = 0; i < count_read; ++i) {
+        for (i = 0; i < count_read; ++i) {
+            if (count_heap < heap_size) {
+                index = get_index(buf[i], heap, count_heap);
+                if (index) {
+                    heap[index].frequency++;
+                } else {
+                    heap[++count_heap].integer = buf[i];
+                    heap[count_heap].frequency = 1;
+                }
+                if (count_heap == heap_size) {
+                    create(heap, heap_size);
+                }
+            } else {
+                index = get_index(buf[i], heap, heap_size);
+                if (index) {
+                    heap[index].frequency++;
+                } else {
+                    heap[heap_size].integer = buf[i];
+                    heap[heap_size].frequency = 1;
+                    index = heap_size;
+                }
+                siftup(index, heap);
+            }
+
             elem.low = (u64)buf[i];
             elem.high = 0ULL;
             extend(&elem);
@@ -279,5 +306,10 @@ int main(void)
     divide(&average, &remainder, sum, (u64)count);
     printf("%lld\t%lld\t%lld\n", average.high, average.low, remainder);
     printf("%lld\t%#llx\t%llu\t%#llx\t%d\n", sum.high, sum.high, sum.low, sum.low, count);
+
+    for (i = 1; i <= count_heap; ++i) {
+        printf("%lld\t", heap[i].frequency);
+    }
+
     return 0;
 }
