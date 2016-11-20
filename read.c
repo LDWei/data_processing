@@ -240,15 +240,9 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
-    // 以下代码把完全二叉树填充为满二叉树，然后在满二叉树的下一层又添加了一个叶子节点，以便添加新的节点到堆中，然后建堆。
-    // 每次要添加新的节点，都把新节点放在此叶子节点上，然后向上调整，让此二叉树依然满足堆的要求。
-    // 因为此叶子节点所在层只有它一个节点，所以此叶子节点上存放的永远是最小的一个（所建堆为大顶堆）。
-    times = 0;
-    while (!(TOP_FREQUENCY<<times & 1<<31)) {
-        ++times;
-    }
-    bits = 32 - times;
-    heap_size = 1 << bits;
+    // 按整数出现频数排序的小顶堆，出现频数最小的在堆顶
+    // 每次有新元素都替代堆顶元素，然后向下调整
+    heap_size = TOP_FREQUENCY;
     // 堆的索引从1到heap_size，即索引0的元素不用
     heap = malloc((heap_size+1) * sizeof(FreqRec));
 
@@ -283,11 +277,11 @@ int main(void)
                 if (index) {
                     heap[index].frequency++;
                 } else {
-                    heap[heap_size].integer = buf[i];
-                    heap[heap_size].frequency = 1;
-                    index = heap_size;
+                    heap[1].integer = buf[i];
+                    heap[1].frequency = 1;
+                    index = 1;
                 }
-                siftup(index, heap);
+                siftdown(index, heap, heap_size);
             }
 
             elem.low = (u64)buf[i];

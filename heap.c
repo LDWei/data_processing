@@ -18,8 +18,8 @@ n32 siftdown(n32 i, FreqRec * h, n32 n)
 
     // 当i结点有儿子（其实是至少有左儿子的情况下）并且有需要继续调整的时候，循环就执行
     while (i*2 <= n && flag == 0) {
-        // 首先判断它和左儿子的关系，并用t记录值较大的结点编号
-        if (h[i].frequency < h[i*2].frequency) {
+        // 首先判断它和左儿子的关系，并用t记录值较小的结点编号
+        if (h[i].frequency > h[i*2].frequency) {
             t = i * 2;
         } else {
             t = i;
@@ -27,13 +27,13 @@ n32 siftdown(n32 i, FreqRec * h, n32 n)
 
         // 如果它有右儿子，再对右儿子进行讨论
         if (i*2+1 <= n) {
-            // 如果右儿子的值更大，更新较大的结点编号
-            if (h[t].frequency < h[i*2+1].frequency) {
+            // 如果右儿子的值更小，更新较小的结点编号
+            if (h[t].frequency > h[i*2+1].frequency) {
                 t = i*2+1;
             }
         }
 
-        // 如果发现最大的结点编号不是自己，说明子结点中有比父结点更大的
+        // 如果发现最小的结点编号不是自己，说明子结点中有比父结点更小的
         if (t != i) {
             swap(h, t, i);
             altered = 1;
@@ -41,7 +41,7 @@ n32 siftdown(n32 i, FreqRec * h, n32 n)
             i = t;
         }
         else {
-            // 否则说明当前的父结点已经比两个子结点都要大了，不需要再进行调整了
+            // 否则说明当前的父结点已经比两个子结点都要小了，不需要再进行调整了
             flag = 1;
         }
     }
@@ -61,16 +61,16 @@ n32 siftup(n32 i, FreqRec * h)
         return altered;
     }
 
-    // 不在堆顶，并且当前结点i的值比父结点大的时候就继续向上调整
+    // 不在堆顶，并且当前结点i的值比父结点小的时候就继续向上调整
     while (i != 1 && flag == 0) {
-        // 判断是否比父结点的大
-        if (h[i].frequency > h[i/2].frequency) {
+        // 判断是否比父结点的小
+        if (h[i].frequency < h[i/2].frequency) {
             // 交换它和它爸爸的位置
             swap(h, i, i/2);
             altered = 1;
         }
         else {
-            // 表示已经不需要调整了，当前结点的值比父结点的值要大
+            // 表示已经不需要调整了，当前结点的值比父结点的值要小
             flag = 1;
         }
         // 这句话很重要，更新编号i为它父结点的编号，从而便于下一次继续向上调整
