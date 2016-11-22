@@ -231,6 +231,7 @@ int main(void)
     FILE *fr;
     n64 * buf;
     u128 sum, elem, average;
+    n32 i;
     n64 remainder, count;
     size_t count_read;
 
@@ -251,7 +252,7 @@ int main(void)
             fclose(fr);
             exit(EXIT_FAILURE);
         }
-        for (int i = 0; i < count_read; ++i) {
+        for (i = 0; i < count_read; ++i) {
             elem.low = (u64)buf[i];
             elem.high = 0ULL;
             extend(&elem);
@@ -268,5 +269,6 @@ int main(void)
     divide(&average, &remainder, sum, (u64)count);
     printf("%lld\t%lld\t%lld\n", average.high, average.low, remainder);
     printf("%lld\t%#llx\t%llu\t%#llx\t%d\n", sum.high, sum.high, sum.low, sum.low, count);
+
     return 0;
 }

@@ -9,6 +9,7 @@ typedef int n32;
 typedef unsigned int u32;
 typedef long long n64;
 typedef unsigned long long u64;
+
 typedef struct s_u128 {
     u64 low;
     u64 high;
