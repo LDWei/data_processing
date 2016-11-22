@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#define BUF_SIZE 134217728      // 64位整数的个数，这里刚好占用1G内存
-/*#define BUF_SIZE 536870912      // 4G内存*/
-typedef int n32;
-typedef unsigned int u32;
-typedef long long n64;
-typedef unsigned long long u64;
-typedef struct s_u128 {
-    u64 low;
-    u64 high;
-}u128;
+#include "common.h"
 
 // 把64位有符号数扩展成128位有符号数
 void extend(u128 * integer)
