@@ -29,7 +29,7 @@ void add_to(n128 *elem, n128 *sum)
 void shl(u128 *integer, u32 times)
 {
     u32 i, loop;
-    u64 mask, mask_clr, temp;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -38,11 +38,11 @@ void shl(u128 *integer, u32 times)
         mask = mask_clr << (64 - times);
 
         integer->high <<= times;
-        temp = integer->low & mask;
-        temp >>= 64 - times;
+        tmp = integer->low & mask;
+        tmp >>= 64 - times;
         // 不能确定是算术右移还是逻辑右移，必须把高位清零
-        temp &= mask_clr;
-        integer->high |= temp;
+        tmp &= mask_clr;
+        integer->high |= tmp;
 
         integer->low <<= times;
     } else {
@@ -60,7 +60,7 @@ void shl(u128 *integer, u32 times)
 void shr(u128 *integer, u32 times)
 {
     u32 i, loop;
-    u64 mask, mask_clr, temp;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -70,9 +70,9 @@ void shr(u128 *integer, u32 times)
 
         integer->low >>= times;
         integer->low &= mask_clr;
-        temp = integer->high & mask;
-        temp <<= 64 - times;
-        integer->low |= temp;
+        tmp = integer->high & mask;
+        tmp <<= 64 - times;
+        integer->low |= tmp;
 
         integer->high >>= times;
         integer->high &= mask_clr;
@@ -91,7 +91,7 @@ void shr(u128 *integer, u32 times)
 void sar(u128 *integer, u32 times)
 {
     u32 i, loop;
-    u64 mask, mask_clr, temp;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -101,17 +101,17 @@ void sar(u128 *integer, u32 times)
 
         integer->low >>= times;
         integer->low &= mask_clr;
-        temp = integer->high & mask;
-        temp <<= 64 - times;
-        integer->low |= temp;
+        tmp = integer->high & mask;
+        tmp <<= 64 - times;
+        integer->low |= tmp;
 
         // 分别处理符号位为0和1的两种情况
         if (integer->high & 1ULL<<63) {
             integer->high >>= times;
             integer->high &= mask_clr;
-            temp = mask;
-            temp <<= 64 - times;
-            integer->high |= temp;
+            tmp = mask;
+            tmp <<= 64 - times;
+            integer->high |= tmp;
         } else {
             integer->high >>= times;
             integer->high &= mask_clr;

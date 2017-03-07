@@ -5,25 +5,25 @@
 // 交换两个元素的值
 static void swap(ElementType *one, ElementType *two)
 {
-    ElementType temp;
+    ElementType tmp;
 
-    temp = *one;
+    tmp = *one;
     *one = *two;
-    *two = temp;
+    *two = tmp;
 }
 
 // 插入排序
 void insertion_sort(ElementType *arr, int n)
 {
     int i, j;
-    ElementType temp;
+    ElementType tmp;
 
     for (i = 1; i < n; ++i) {
-        temp = arr[i];
-        for (j = i-1; j >= 0 && arr[j] > temp; --j) {
+        tmp = arr[i];
+        for (j = i-1; j >= 0 && arr[j] > tmp; --j) {
             arr[j+1] = arr[j];
         }
-        arr[j+1] = temp;
+        arr[j+1] = tmp;
     }
 }
 

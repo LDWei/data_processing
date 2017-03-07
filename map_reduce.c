@@ -9,7 +9,7 @@ void reduce(n64 * m, int group, int level)
     FILE *fr, *fw;
     n64 count;
     size_t count_read;
-    char fname[10], temp[10];
+    char fname[10], tmp[10];
 
     if ((fr = fopen("test.data", "rb")) == NULL ) {
         fprintf(stderr, "Error in open file \"test.data\" to read.\n");
@@ -28,10 +28,10 @@ void reduce(n64 * m, int group, int level)
         }
 
         quick_sort(count_read/2, buf, 0, count_read);
-        sprintf(temp, "%d", level);
-        strcpy(fname, temp);
-        sprintf(temp, "%03d", group);
-        strcat(fname, temp);
+        sprintf(tmp, "%d", level);
+        strcpy(fname, tmp);
+        sprintf(tmp, "%03d", group);
+        strcat(fname, tmp);
         strcat(fname, "0");
         if ((fw = fopen(fname, "wb")) == NULL) {
             fprintf(stderr, "Error in open file \"%s\" to write.\n", fname);
@@ -40,10 +40,10 @@ void reduce(n64 * m, int group, int level)
         fwrite(buf, 8, count_read/2+1, fw);
         fclose(fw);
 
-        sprintf(temp, "%d", level);
-        strcpy(fname, temp);
-        sprintf(temp, "%03d", group);
-        strcat(fname, temp);
+        sprintf(tmp, "%d", level);
+        strcpy(fname, tmp);
+        sprintf(tmp, "%03d", group);
+        strcat(fname, tmp);
         strcat(fname, "1");
         if ((fw = fopen(fname, "wb")) == NULL) {
             fprintf(stderr, "Error in open file \"%s\" to write.\n", fname);
