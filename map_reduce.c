@@ -27,7 +27,7 @@ void reduce(n64 * m, int group, int level)
             exit(EXIT_FAILURE);
         }
 
-        quick_sort(count_read/2, buf, 0, count_read);
+        quick_select(count_read/2, buf, 0, count_read);
         sprintf(tmp, "%d", level);
         strcpy(fname, tmp);
         sprintf(tmp, "%03d", group);

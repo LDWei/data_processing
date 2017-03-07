@@ -13,7 +13,7 @@ static void swap(ElementType *one, ElementType *two)
 }
 
 // 插入排序
-void insertion_sort(ElementType *arr, int n)
+static void insertion_sort(ElementType *arr, int n)
 {
     int i, j;
     ElementType tmp;
@@ -28,7 +28,7 @@ void insertion_sort(ElementType *arr, int n)
 }
 
 // 找枢轴
-ElementType median3(ElementType *arr, int left, int right)
+static ElementType median3(ElementType *arr, int left, int right)
 {
     int center;
 
@@ -48,7 +48,7 @@ ElementType median3(ElementType *arr, int left, int right)
 }
 
 // 让数组arr中索引为k的元素归位
-void quick_sort(int k, ElementType *arr, int left, int right)
+void quick_select(int k, ElementType *arr, int left, int right)
 {
     n32 i, j;
     ElementType pivot;
@@ -73,11 +73,47 @@ void quick_sort(int k, ElementType *arr, int left, int right)
         swap(&arr[i], &arr[right-1]);
 
         if (k < i) {
-            quick_sort(k, arr, left, i-1);
+            quick_select(k, arr, left, i-1);
         } else if (k > i) {
-            quick_sort(k, arr, i+1, right);
+            quick_select(k, arr, i+1, right);
         }
     } else {
         insertion_sort(arr+left, right-left+1);
     }
+}
+
+static void qsort(ElementType *arr, int left, int right)
+{
+    int i, j;
+    ElementType pivot;
+
+    if (left + cutoff <= right) {
+        pivot = median3(arr, left, right);
+        i = left;
+        j = right - 1;
+        while (1) {
+            while (arr[++i] < pivot) {
+                continue;
+            }
+            while (arr[--j] > pivot) {
+                continue;
+            }
+            if (i < j) {
+                swap(&arr[i], &arr[j]);
+            } else {
+                break;
+            }
+        }
+        swap(&arr[i], &arr[right-1]);
+
+        qsort(arr, left, i-1);
+        qsort(arr, i+1, right);
+    } else {
+        insertion_sort(arr+left, right-left+1);
+    }
+}
+
+void quick_sort(ElementType *arr, int n)
+{
+    qsort(arr, 0, n-1);
 }
