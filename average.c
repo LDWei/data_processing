@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "type.h"
-#include "read.h"
+#include "common.h"
 #include "calculate.h"
 
 int main(void)
 {
     FILE *fr;
     n64 * buf;
-    u128 sum, elem, average;
+    n128 sum, elem, average;
     u32 i;
     n64 remainder, count;
     size_t count_read;
@@ -24,12 +24,18 @@ int main(void)
     sum.low = 0ULL;
     sum.high = 0ULL;
     while (1) {
+        if (feof(fr)) {
+            break;
+        }
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
         count_read = fread(buf, 8, BUF_SIZE, fr);
         if (ferror(fr)) {
             perror("ferror() was called.");
             fclose(fr);
             exit(EXIT_FAILURE);
+        }
+        if (count_read == 0) {
+            break;
         }
         for (i = 0; i < count_read; ++i) {
             elem.low = (u64)buf[i];
@@ -38,9 +44,6 @@ int main(void)
             add_to(&elem, &sum);
         }
         count += (n64)count_read;
-        if (feof(fr)) {
-            break;
-        }
     }
     free(buf);
     fclose(fr);

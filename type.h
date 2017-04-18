@@ -10,10 +10,16 @@ typedef struct s_n128 {
     u64 high;
 }u128;
 typedef u128 n128;
-typedef struct s_node {
-    n64 integer;
-    struct s_node * next;
-}Node;
-typedef Node * List;
+typedef struct s_node_file {
+    char filename[11];
+    struct s_node_file *next;
+}NodeFile;
+typedef struct s_node_section {
+    NodeFile *left_file_list;
+    n64 median;
+    NodeFile *right_file_list;
+    struct s_node_section *next;
+}NodeSection;
+typedef NodeSection *Section;
 
 #endif
