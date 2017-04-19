@@ -13,8 +13,8 @@ int main(void)
     n64 remainder, count;
     size_t count_read;
 
-    if ((fr = fopen("test.data", "rb")) == NULL) {
-        perror("test.data");
+    if ((fr = fopen(INPUT_FILENAME, "rb")) == NULL) {
+        perror(INPUT_FILENAME);
         exit(EXIT_FAILURE);
     }
 
@@ -30,7 +30,7 @@ int main(void)
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
         count_read = fread(buf, 8, BUF_SIZE, fr);
         if (ferror(fr)) {
-            perror("test.data");
+            perror(INPUT_FILENAME);
             fclose(fr);
             exit(EXIT_FAILURE);
         }

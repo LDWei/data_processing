@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "type.h"
 #include "common.h"
 #include "sort.h"
 Section carve(n64 * buf)
 {
-    FILE *fr, *fw;
+    FILE *fr;
+    int fw;
     size_t count_read;
     Section section_list;
     NodeSection *curr, *prev;
     NodeFile *file_list;
 
-    if ((fr = fopen("test.data", "rb")) == NULL ) {
-        perror("test.data");
+    if ((fr = fopen(INPUT_FILENAME, "rb")) == NULL ) {
+        perror(INPUT_FILENAME);
         exit(EXIT_FAILURE);
     }
 
@@ -25,7 +27,7 @@ Section carve(n64 * buf)
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
         count_read = fread(buf, 8, BUF_SIZE, fr);
         if (ferror(fr)) {
-            perror("test.data");
+            perror(INPUT_FILENAME);
             fclose(fr);
             exit(EXIT_FAILURE);
         }
@@ -48,26 +50,22 @@ Section carve(n64 * buf)
         file_list = (NodeFile *)malloc(sizeof(NodeFile));
         strcpy(file_list->filename, "tmp_XXXXXX");
         curr->left_file_list = file_list;
-        // TODO
-        mkstemp(curr->left_file_list->filename);
-        if ((fw = fopen(curr->left_file_list->filename, "wb")) == NULL) {
+        if ((fw = mkstemp(curr->left_file_list->filename)) == -1) {
             perror(curr->left_file_list->filename);
             exit(EXIT_FAILURE);
         }
-        fwrite(buf, 8, count_read/2, fw);
-        fclose(fw);
+        write(fw, buf, sizeof(n64) * (count_read/2));
+        close(fw);
 
         file_list = (NodeFile *)malloc(sizeof(NodeFile));
         strcpy(file_list->filename, "tmp_XXXXXX");
         curr->right_file_list = file_list;
-        // TODO
-        mkstemp(curr->right_file_list->filename);
-        if ((fw = fopen(curr->right_file_list->filename, "wb")) == NULL) {
+        if ((fw = mkstemp(curr->right_file_list->filename)) == -1) {
             perror(curr->right_file_list->filename);
             exit(EXIT_FAILURE);
         }
-        fwrite(buf+count_read/2, 8, count_read-count_read/2, fw);
-        fclose(fw);
+        write(fw, buf+count_read/2, sizeof(n64) * (count_read-count_read/2));
+        close(fw);
     }
     fclose(fr);
 
