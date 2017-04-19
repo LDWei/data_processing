@@ -50,7 +50,7 @@ static ElementType median3(ElementType *arr, int left, int right)
 // 让数组arr中索引为k的元素归位
 void quick_select(int k, ElementType *arr, int left, int right)
 {
-    n32 i, j;
+    int i, j;
     ElementType pivot;
 
     if (left + cutoff <= right) {

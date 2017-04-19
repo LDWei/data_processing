@@ -9,12 +9,12 @@ int main(void)
     FILE *fr;
     n64 * buf;
     n128 sum, elem, average;
-    u32 i;
+    int i;
     n64 remainder, count;
     size_t count_read;
 
-    if ((fr = fopen("test.data", "rb")) == NULL ) {
-        fprintf(stderr, "Error in open file \"test.data\" to read.\n");
+    if ((fr = fopen("test.data", "rb")) == NULL) {
+        perror("test.data");
         exit(EXIT_FAILURE);
     }
 
@@ -30,7 +30,7 @@ int main(void)
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
         count_read = fread(buf, 8, BUF_SIZE, fr);
         if (ferror(fr)) {
-            perror("ferror() was called.");
+            perror("test.data");
             fclose(fr);
             exit(EXIT_FAILURE);
         }

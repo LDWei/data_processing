@@ -26,9 +26,9 @@ void add_to(n128 *elem, n128 *sum)
 }
 
 // 把integer逻辑左移times位
-void shl(u128 *integer, u32 times)
+void shl(u128 *integer, int times)
 {
-    u32 i, loop;
+    int i, loop;
     u64 mask, mask_clr, tmp;
 
     times %= 128;
@@ -57,9 +57,9 @@ void shl(u128 *integer, u32 times)
 }
 
 // 把integer逻辑右移times位
-void shr(u128 *integer, u32 times)
+void shr(u128 *integer, int times)
 {
-    u32 i, loop;
+    int i, loop;
     u64 mask, mask_clr, tmp;
 
     times %= 128;
@@ -88,9 +88,9 @@ void shr(u128 *integer, u32 times)
 }
 
 // 把integer算术右移times位
-void sar(u128 *integer, u32 times)
+void sar(u128 *integer, int times)
 {
-    u32 i, loop;
+    int i, loop;
     u64 mask, mask_clr, tmp;
 
     times %= 128;
@@ -128,7 +128,7 @@ void sar(u128 *integer, u32 times)
 }
 
 // 返回integer的高bits位
-static u64 get_top_bits(u128 *integer, u32 bits)
+static u64 get_top_bits(u128 *integer, int bits)
 {
     u64 mask, mask_clr, top;
 
@@ -146,17 +146,17 @@ static u64 get_top_bits(u128 *integer, u32 bits)
 // 负数先取相反数（补码）进行运算，最后再确定商和余数的符号
 void divide(n128 *quotient, u64 *remainder, n128 dividend, u64 divisor)
 {
-    u32 i, flag_quotient, flag_remainder, bits, times;
+    int i, flag_quotient, flag_remainder, bits, times;
     u64 mask;
 
     mask = 1ULL << 63;
     // 无法计算有符号数的最小值，因为它的相反数（补码）是它本身
     if (dividend.high == mask && dividend.low == 0ULL || divisor == mask) {
-        perror("Can't calculate!\n");
+        fprintf(stderr, "Can't calculate!\n");
         exit(EXIT_FAILURE);
     }
     if (divisor == 0ULL) {
-        perror("Division by zero!\n");
+        fprintf(stderr, "Division by zero!\n");
         exit(EXIT_FAILURE);
     }
 

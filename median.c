@@ -13,7 +13,7 @@ Section carve(n64 * buf)
     NodeFile *file_list;
 
     if ((fr = fopen("test.data", "rb")) == NULL ) {
-        fprintf(stderr, "Error in open file \"test.data\" to read.\n");
+        perror("test.data");
         exit(EXIT_FAILURE);
     }
 
@@ -25,7 +25,7 @@ Section carve(n64 * buf)
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
         count_read = fread(buf, 8, BUF_SIZE, fr);
         if (ferror(fr)) {
-            perror("ferror() was called.");
+            perror("test.data");
             fclose(fr);
             exit(EXIT_FAILURE);
         }
@@ -48,9 +48,10 @@ Section carve(n64 * buf)
         file_list = (NodeFile *)malloc(sizeof(NodeFile));
         strcpy(file_list->filename, "tmp_XXXXXX");
         curr->left_file_list = file_list;
+        // TODO
         mkstemp(curr->left_file_list->filename);
         if ((fw = fopen(curr->left_file_list->filename, "wb")) == NULL) {
-            fprintf(stderr, "Error in open file \"%s\" to write.\n", curr->left_file_list->filename);
+            perror(curr->left_file_list->filename);
             exit(EXIT_FAILURE);
         }
         fwrite(buf, 8, count_read/2, fw);
@@ -59,14 +60,16 @@ Section carve(n64 * buf)
         file_list = (NodeFile *)malloc(sizeof(NodeFile));
         strcpy(file_list->filename, "tmp_XXXXXX");
         curr->right_file_list = file_list;
+        // TODO
         mkstemp(curr->right_file_list->filename);
         if ((fw = fopen(curr->right_file_list->filename, "wb")) == NULL) {
-            fprintf(stderr, "Error in open file \"%s\" to write.\n", curr->right_file_list->filename);
+            perror(curr->right_file_list->filename);
             exit(EXIT_FAILURE);
         }
         fwrite(buf+count_read/2, 8, count_read-count_read/2, fw);
         fclose(fw);
     }
+    fclose(fr);
 
     return section_list;
 }
@@ -74,5 +77,6 @@ int main(void)
 {
     n64 *buf = (n64 *)malloc(BUF_SIZE * sizeof(n64));
     carve(buf);
+    free(buf);
     return 0;
 }
