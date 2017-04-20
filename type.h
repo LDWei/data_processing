@@ -10,16 +10,20 @@ typedef struct s_n128 {
     u64 high;
 }u128;
 typedef u128 n128;
-typedef struct s_node_file {
+union section {
+    struct s_node_part *part;
     char filename[11];
-    struct s_node_file *next;
-}NodeFile;
-typedef struct s_node_section {
-    NodeFile *left_file_list;
+};
+typedef struct s_part {
+    union section left;
+    union section right;
     n64 median;
-    NodeFile *right_file_list;
-    struct s_node_section *next;
-}NodeSection;
-typedef NodeSection *Section;
+    int flag;       // if flag == 0, left and right is a file, else is a part
+}Part;
+typedef struct s_node {
+    Part elem;
+    struct s_node *next;
+}Node;
+typedef Node *List;
 
 #endif

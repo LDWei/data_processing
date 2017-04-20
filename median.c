@@ -5,21 +5,20 @@
 #include "type.h"
 #include "common.h"
 #include "sort.h"
-Section carve(n64 * buf)
+List carve(n64 * buf)
 {
     FILE *fr;
     int fw;
     size_t count_read;
-    Section section_list;
-    NodeSection *curr, *prev;
-    NodeFile *file_list;
+    List part_list;
+    Node *curr, *prev;
 
     if ((fr = fopen(INPUT_FILENAME, "rb")) == NULL ) {
         perror(INPUT_FILENAME);
         exit(EXIT_FAILURE);
     }
 
-    section_list = NULL;
+    part_list = NULL;
     while (1) {
         if (feof(fr)) {
             break;
@@ -37,40 +36,44 @@ Section carve(n64 * buf)
 
         quick_select(count_read/2, buf, 0, count_read);
 
-        curr = (NodeSection *)malloc(sizeof(NodeSection));
-        curr->median = buf[count_read/2];
-        curr->next = NULL;
-        if (section_list == NULL) {
-            section_list = curr;
-        } else {
-            prev->next = curr;
-        }
-        prev = curr;
+        curr = (Node *)malloc(sizeof(Node));
+        curr->elem.median = buf[count_read/2];
+        curr->elem.flag = 0;
 
-        file_list = (NodeFile *)malloc(sizeof(NodeFile));
-        strcpy(file_list->filename, "tmp_XXXXXX");
-        curr->left_file_list = file_list;
-        if ((fw = mkstemp(curr->left_file_list->filename)) == -1) {
-            perror(curr->left_file_list->filename);
+        strcpy(curr->elem.left.filename, "tmp_XXXXXX");
+        if ((fw = mkstemp(curr->elem.left.filename)) == -1) {
+            perror(curr->elem.left.filename);
             exit(EXIT_FAILURE);
         }
         write(fw, buf, sizeof(n64) * (count_read/2));
         close(fw);
 
-        file_list = (NodeFile *)malloc(sizeof(NodeFile));
-        strcpy(file_list->filename, "tmp_XXXXXX");
-        curr->right_file_list = file_list;
-        if ((fw = mkstemp(curr->right_file_list->filename)) == -1) {
-            perror(curr->right_file_list->filename);
+        strcpy(curr->elem.right.filename, "tmp_XXXXXX");
+        if ((fw = mkstemp(curr->elem.right.filename)) == -1) {
+            perror(curr->elem.right.filename);
             exit(EXIT_FAILURE);
         }
         write(fw, buf+count_read/2, sizeof(n64) * (count_read-count_read/2));
         close(fw);
+
+        curr->next = NULL;
+        if (part_list == NULL) {
+            part_list = curr;
+        } else {
+            prev->next = curr;
+        }
+        prev = curr;
     }
     fclose(fr);
 
-    return section_list;
+    return part_list;
 }
+
+Part* merge(Part *a, Part *b)
+{
+
+}
+
 int main(void)
 {
     n64 *buf = (n64 *)malloc(BUF_SIZE * sizeof(n64));
