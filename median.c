@@ -240,17 +240,18 @@ int main(void)
     head = carve(buf);
     tail = find_tail(head);
     while (head != tail || count % 2) {
-        tmp = head->next;
         if (count % 2) {
             new = (Node *)malloc(sizeof(Node));
             new->elem = merge(brother->elem, head->elem, buf);
             free(brother);
-            free(head);
             new->next = NULL;
             tail->next = new;
             tail = tail->next;
+            tmp = head->next;
+            free(head);
         } else {
             brother = head;
+            tmp = head->next;
         }
         head = tmp;
         count++;
