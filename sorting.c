@@ -221,43 +221,29 @@ Node* find_tail(List head)
     return head;
 }
 
-void clean(Part *root)
-{
-    if (root->flag != 0) {
-        clean(root->left.part);
-        clean(root->right.part);
-    }
-    free(root);
-}
-
 int main(void)
 {
     int count = 0;
     List head;
-    Node *tail, *brother, *new, *tmp;
+    Node *tail, *brother, *new;
     n64 *buf = (n64 *)malloc(BUF_SIZE * sizeof(n64));
     system("rm -f tmp_*");
     head = carve(buf);
     tail = find_tail(head);
     while (head != tail || count % 2) {
-        tmp = head->next;
         if (count % 2) {
             new = (Node *)malloc(sizeof(Node));
             new->elem = merge(brother->elem, head->elem, buf);
             free(brother);
-            free(head);
             new->next = NULL;
             tail->next = new;
             tail = tail->next;
-        } else {
-            brother = head;
         }
-        head = tmp;
+        brother = head;
+        head = head->next;
         count++;
     }
     printf("%lld\n", head->elem->median);
-    clean(head->elem);
-    free(head);
     free(buf);
     return 0;
 }
