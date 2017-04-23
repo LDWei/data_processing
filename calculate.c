@@ -1,7 +1,10 @@
-#include "common.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "type.h"
+#include "calculate.h"
 
 // 把64位有符号数扩展成128位有符号数
-void extend(u128 * integer)
+void extend(n128 *integer)
 {
     u64 mask;
 
@@ -13,7 +16,7 @@ void extend(u128 * integer)
 }
 
 // sum += elem
-void add_to(u128 * elem, u128 * sum)
+void add_to(n128 *elem, n128 *sum)
 {
     sum->low += elem->low;
     if (sum->low < elem->low) {
@@ -23,10 +26,10 @@ void add_to(u128 * elem, u128 * sum)
 }
 
 // 把integer逻辑左移times位
-void shl(u128 * integer, u32 times)
+void shl(u128 *integer, int times)
 {
-    u32 i, loop;
-    u64 mask, mask_clr, temp;
+    int i, loop;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -35,11 +38,11 @@ void shl(u128 * integer, u32 times)
         mask = mask_clr << (64 - times);
 
         integer->high <<= times;
-        temp = integer->low & mask;
-        temp >>= 64 - times;
+        tmp = integer->low & mask;
+        tmp >>= 64 - times;
         // 不能确定是算术右移还是逻辑右移，必须把高位清零
-        temp &= mask_clr;
-        integer->high |= temp;
+        tmp &= mask_clr;
+        integer->high |= tmp;
 
         integer->low <<= times;
     } else {
@@ -54,10 +57,10 @@ void shl(u128 * integer, u32 times)
 }
 
 // 把integer逻辑右移times位
-void shr(u128 * integer, u32 times)
+void shr(u128 *integer, int times)
 {
-    u32 i, loop;
-    u64 mask, mask_clr, temp;
+    int i, loop;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -67,9 +70,9 @@ void shr(u128 * integer, u32 times)
 
         integer->low >>= times;
         integer->low &= mask_clr;
-        temp = integer->high & mask;
-        temp <<= 64 - times;
-        integer->low |= temp;
+        tmp = integer->high & mask;
+        tmp <<= 64 - times;
+        integer->low |= tmp;
 
         integer->high >>= times;
         integer->high &= mask_clr;
@@ -85,10 +88,10 @@ void shr(u128 * integer, u32 times)
 }
 
 // 把integer算术右移times位
-void sar(u128 * integer, u32 times)
+void sar(u128 *integer, int times)
 {
-    u32 i, loop;
-    u64 mask, mask_clr, temp;
+    int i, loop;
+    u64 mask, mask_clr, tmp;
 
     times %= 128;
     if (times <= 63) {
@@ -98,17 +101,17 @@ void sar(u128 * integer, u32 times)
 
         integer->low >>= times;
         integer->low &= mask_clr;
-        temp = integer->high & mask;
-        temp <<= 64 - times;
-        integer->low |= temp;
+        tmp = integer->high & mask;
+        tmp <<= 64 - times;
+        integer->low |= tmp;
 
         // 分别处理符号位为0和1的两种情况
         if (integer->high & 1ULL<<63) {
             integer->high >>= times;
             integer->high &= mask_clr;
-            temp = mask;
-            temp <<= 64 - times;
-            integer->high |= temp;
+            tmp = mask;
+            tmp <<= 64 - times;
+            integer->high |= tmp;
         } else {
             integer->high >>= times;
             integer->high &= mask_clr;
@@ -125,7 +128,7 @@ void sar(u128 * integer, u32 times)
 }
 
 // 返回integer的高bits位
-u64 get_top_bits(u128 * integer, u32 bits)
+static u64 get_top_bits(u128 *integer, int bits)
 {
     u64 mask, mask_clr, top;
 
@@ -141,19 +144,19 @@ u64 get_top_bits(u128 * integer, u32 bits)
 }
 
 // 负数先取相反数（补码）进行运算，最后再确定商和余数的符号
-void divide(u128 * quotient, u64 * remainder, u128 dividend, u64 divisor)
+void divide(n128 *quotient, u64 *remainder, n128 dividend, u64 divisor)
 {
-    u32 i, flag_quotient, flag_remainder, bits, times;
+    int i, flag_quotient, flag_remainder, bits, times;
     u64 mask;
 
     mask = 1ULL << 63;
     // 无法计算有符号数的最小值，因为它的相反数（补码）是它本身
     if (dividend.high == mask && dividend.low == 0ULL || divisor == mask) {
-        perror("Can't calculate!\n");
+        fprintf(stderr, "Can't calculate!\n");
         exit(EXIT_FAILURE);
     }
     if (divisor == 0ULL) {
-        perror("Division by zero!\n");
+        fprintf(stderr, "Division by zero!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -224,51 +227,4 @@ void divide(u128 * quotient, u64 * remainder, u128 dividend, u64 divisor)
             quotient->high += 1ULL;
         }
     }
-}
-
-int main(void)
-{
-    FILE *fr;
-    n64 * buf;
-    u128 sum, elem, average;
-    n32 i;
-    n64 remainder, count;
-    size_t count_read;
-
-    if ((fr = fopen("test.data", "rb")) == NULL ) {
-        exit(EXIT_FAILURE);
-    }
-
-    // 不能静态分配大数组，gcc会产生段错误，只能动态分配
-    buf = malloc(BUF_SIZE * sizeof(n64));
-    count = 0ULL;
-    sum.low = 0ULL;
-    sum.high = 0ULL;
-    while (1) {
-        // 因为内存限制，每次只读取BUF_SIZE个64位整数
-        count_read = fread(buf, 8, BUF_SIZE, fr);
-        if (ferror(fr)) {
-            perror("ferror() was called.");
-            fclose(fr);
-            exit(EXIT_FAILURE);
-        }
-        for (i = 0; i < count_read; ++i) {
-            elem.low = (u64)buf[i];
-            elem.high = 0ULL;
-            extend(&elem);
-            add_to(&elem, &sum);
-        }
-        count += (n64)count_read;
-        if (feof(fr)) {
-            break;
-        }
-    }
-
-    average.high = 0ULL;
-    average.low = 0ULL;
-    divide(&average, &remainder, sum, (u64)count);
-    printf("%lld\t%lld\t%lld\n", average.high, average.low, remainder);
-    printf("%lld\t%#llx\t%llu\t%#llx\t%d\n", sum.high, sum.high, sum.low, sum.low, count);
-
-    return 0;
 }
