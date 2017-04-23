@@ -28,7 +28,7 @@ int main(void)
             break;
         }
         // 因为内存限制，每次只读取BUF_SIZE个64位整数
-        count_read = fread(buf, 8, BUF_SIZE, fr);
+        count_read = fread(buf, sizeof(n64), BUF_SIZE, fr);
         if (ferror(fr)) {
             perror(INPUT_FILENAME);
             fclose(fr);

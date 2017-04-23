@@ -10,8 +10,9 @@ typedef struct s_n128 {
     u64 high;
 }u128;
 typedef u128 n128;
+struct s_part;
 union section {
-    struct s_node_part *part;
+    struct s_part *part;
     char filename[11];
 };
 typedef struct s_part {
@@ -21,7 +22,7 @@ typedef struct s_part {
     int flag;       // if flag == 0, left and right is a file, else is a part
 }Part;
 typedef struct s_node {
-    Part elem;
+    Part *elem;
     struct s_node *next;
 }Node;
 typedef Node *List;
