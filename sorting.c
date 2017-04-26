@@ -272,13 +272,83 @@ Part* build_median_tree(n64 *buf)
     return ret;
 }
 
+void sort_tree(Part *root, n64 *buf)
+{
+    FILE *fr, *fw;
+    size_t count_read;
+
+    if (root == NULL) {
+        return;
+    }
+    if (root->flag == 0) {
+        if ((fr = fopen(root->left.filename, "rb")) == NULL ) {
+            perror(root->left.filename);
+            exit(EXIT_FAILURE);
+        }
+        count_read = fread(buf, sizeof(n64), BUF_SIZE/3, fr);
+        if (ferror(fr)) {
+            perror(root->left.filename);
+            fclose(fr);
+            exit(EXIT_FAILURE);
+        }
+        fclose(fr);
+
+        quick_sort(buf, count_read);
+        printf("l: %lld\t%lld\n", buf[0], buf[count_read-1]);
+
+        if ((fw = fopen(root->left.filename, "wb")) == NULL ) {
+            perror(root->left.filename);
+            exit(EXIT_FAILURE);
+        }
+        fwrite(buf, sizeof(n64), count_read, fw);
+        if (ferror(fw)) {
+            perror(root->left.filename);
+            fclose(fw);
+            exit(EXIT_FAILURE);
+        }
+        fclose(fw);
+
+        if ((fr = fopen(root->right.filename, "rb")) == NULL ) {
+            perror(root->right.filename);
+            exit(EXIT_FAILURE);
+        }
+        count_read = fread(buf, sizeof(n64), BUF_SIZE/3, fr);
+        if (ferror(fr)) {
+            perror(root->right.filename);
+            fclose(fr);
+            exit(EXIT_FAILURE);
+        }
+        fclose(fr);
+
+        quick_sort(buf, count_read);
+        printf("r: %lld\t%lld\n", buf[0], buf[count_read-1]);
+
+        if ((fw = fopen(root->right.filename, "wb")) == NULL ) {
+            perror(root->right.filename);
+            exit(EXIT_FAILURE);
+        }
+        fwrite(buf, sizeof(n64), count_read, fw);
+        if (ferror(fw)) {
+            perror(root->right.filename);
+            fclose(fw);
+            exit(EXIT_FAILURE);
+        }
+        fclose(fw);
+    } else {
+        sort_tree(root->left.part, buf);
+        sort_tree(root->right.part, buf);
+    }
+
+    printf("m: %lld\n", root->median);
+}
+
 int main(void)
 {
     Part *root;
     n64 *buf = (n64 *)malloc(BUF_SIZE * sizeof(n64));
     system("rm -f tmp_*");
     root = build_median_tree(buf);
-    printf("%lld\n", root->median);
+    sort_tree(root, buf);
     clean(root);
     free(buf);
     return 0;
