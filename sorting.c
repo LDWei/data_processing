@@ -339,7 +339,7 @@ void sort_tree(Part *root, n64 *buf)
         sort_tree(root->right.part, buf);
     }
 
-    printf("m: %lld\n", root->median);
+    printf("m: %lld\n\n", root->median);
 }
 
 int main(void)
